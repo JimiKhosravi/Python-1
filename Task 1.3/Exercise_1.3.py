@@ -48,9 +48,6 @@ for recipe in recipes_list:
 
 print('''Ingredients available across all recipes
 -------------------------------------------- ''')
-ingredients_list = []
-for recipe in recipes_list:
-    for ingredient in recipe['ingredients']:
-        ingredients_list.append(ingredient)
-for i in ingredients_list:
+
+for i in sorted(ingredients_list):
     print(i)
