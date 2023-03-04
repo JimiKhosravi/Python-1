@@ -1,21 +1,23 @@
 import pickle
 
+
 def calc_difficulty(recipe):
     if recipe['Cooking_Time'] < 10 and len(recipe['Ingredients']) < 4:
-        recipe['Difficulty'] = 'Easy'
+        difficulty = 'Easy'
 
     elif recipe['Cooking_Time'] < 10 and len(recipe['Ingredients']) >= 4:
-        recipe['Difficulty'] = 'Medium'
+        difficulty = 'Medium'
 
     elif recipe['Cooking_Time'] >= 10 and len(recipe['Ingredients']) < 4:
-        recipe['Difficulty'] = 'Intermediate'
+        difficulty = 'Intermediate'
 
     elif recipe['Cooking_Time'] >= 10 and len(recipe['Ingredients']) >= 4:
-        recipe['Difficulty'] = 'Hard'
+        difficulty = 'Hard'
+    return difficulty
 
 
 def take_recipe():
-    name = str(input('Enter the name of your recipe: '))
+    name = input('Enter the name of your recipe: ')
     cooking_time = int(
         input('Enter the cooking time for your recipe in minutes: '))
     ingredients = input('Enter the ingredients for your recipe: ')
@@ -23,14 +25,14 @@ def take_recipe():
     ingredients = [ingredient.lower() for ingredient in ingredients]
     recipe = {'Name': name, 'Cooking_Time': cooking_time,
               'Ingredients': ingredients}
-    difficulty = calc_difficulty(recipe)
+    recipe['Difficulty'] = calc_difficulty(recipe)
     return recipe
 
 
 recipes_list = []
 all_ingredients = []
 
-filename = str(input('Enter a filename with your recipes: '))
+filename = input('Enter a filename with your recipes: ')
 
 try:
     recipes_file = open(filename, 'rb')
@@ -61,6 +63,6 @@ for i in range(num):
 
 data = {'recipes_list': recipes_list, 'all_ingredients': all_ingredients}
 
-new_file_name = str(input('Enter a name for your new file.'))
-new_file_name = open(new_file_name, 'wb')
-pickle.dump(data, new_file_name)
+new_file_name = input('Enter a name for your new file.')
+with open(new_file_name, 'wb') as f:
+    pickle.dump(data, f)

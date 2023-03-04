@@ -35,8 +35,7 @@ def search_ingredient(data):
 
 
 # Enter the file name
-filename = str(
-    input('Enter the filename where you\'ve stored your recipes:  '))
+filename = input('Enter the filename where you\'ve stored your recipes:  ')
 try:
     recipes_file = open(filename, 'rb')
     data = pickle.load(recipes_file)
@@ -51,3 +50,6 @@ except:
 
 else:
     search_ingredient(data)
+
+finally:
+    recipes_file.close()
