@@ -5,8 +5,8 @@ class Recipe(object):
     def __init__(self, name):
         self.name = name
         self.ingredients = []
-        self.cooking_time = int(0)
-        self.difficulty = ''
+        self.cooking_time = 0
+        self.difficulty = None
 
     def get_name(self):
         output = 'Recipe name: ' + str(self.name)
@@ -23,35 +23,32 @@ class Recipe(object):
         self.cooking_time = int(cooking_time)
 
     def add_ingredients(self, *args):
-        self.ingredients = args
+        self.ingredients = list(args)
         self.update_all_ingredients()
 
     def get_ingredients(self):
         print('\nIngredients: ')
         print('---------------------------')
-        for ingredient in self.ingredients:
-            print(' - ' + str(ingredient))
-        print('\n')
+        print(self.ingredients)
 
     def get_difficulty(self):
-        difficulty = self.calc_difficulty(self.cooking_time, self.ingredients)
-        output = 'Difficulty: ' + str(self.cooking_time)
-        self.difficulty = difficulty
-        return output
+        if self.difficulty == None:
+            self.difficulty = self.calc_difficulty(
+                self.cooking_time, self.ingredients)
+        return self.difficulty
 
     def calc_difficulty(self, cooking_time, ingredients):
         if (cooking_time < 10) and (len(ingredients) < 4):
-            difficulty_level = 'Easy'
+            self.difficulty = 'Easy'
         elif (cooking_time < 10) and (len(ingredients) >= 4):
-            difficulty_level = 'Medium'
+            self.difficulty = 'Medium'
         elif (cooking_time >= 10) and (len(ingredients) < 4):
-            difficulty_level = 'Intermediate'
+            self.difficulty = 'Intermediate'
         elif (cooking_time >= 10) and (len(ingredients) >= 4):
-            difficulty_level = 'Hard'
+            self.difficulty = 'Hard'
         else:
             print('Something bad happened, please try again')
-
-        return difficulty_level
+        return self.difficulty
 
     def update_all_ingredients(self):
         for ingredient in self.ingredients:
@@ -84,6 +81,7 @@ class Recipe(object):
     def view_recipe(self):
         print('\nName: ' + str(self.name))
         print('Cooking time: ' + str(self.cooking_time))
+        print('\nDifficulty: ' + str(self.difficulty))
         self.get_ingredients()
 
 
