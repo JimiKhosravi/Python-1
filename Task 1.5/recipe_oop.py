@@ -31,19 +31,18 @@ class Recipe(object):
 
     def get_difficulty(self):
         if self.difficulty == None:
-            self.difficulty = self.calc_difficulty(
-                self.cooking_time, self.ingredients)
+            self.calc_difficulty(self.cooking_time, self.ingredients)
         return self.difficulty
 
     def calc_difficulty(self, cooking_time, ingredients):
         if (cooking_time < 10) and (len(ingredients) < 4):
-            return 'Easy'
+            self.difficulty = 'Easy'
         elif (cooking_time < 10) and (len(ingredients) >= 4):
-            return 'Medium'
+            self.difficulty = 'Medium'
         elif (cooking_time >= 10) and (len(ingredients) < 4):
-            return 'Intermediate'
+            self.difficulty = 'Intermediate'
         elif (cooking_time >= 10) and (len(ingredients) >= 4):
-            return 'Hard'
+            self.difficulty = 'Hard'
         else:
             print('Something bad happened, please try again')
 
@@ -77,11 +76,13 @@ class Recipe(object):
 
     def view_recipe(self):
         print('\nName: ' + str(self.name))
-        print('Cooking time: ' + str(self.cooking_time))
+        print('\nCooking time: ' + str(self.cooking_time))
         print('\nDifficulty: ' + str(self.difficulty))
         print('\nIngredients: ')
         print('---------------------------')
-        self.get_ingredients()
+        show_ingredients = self.get_ingredients()
+        for ingre in show_ingredients:
+            print(ingre)
 
 
 recipes_list = []
