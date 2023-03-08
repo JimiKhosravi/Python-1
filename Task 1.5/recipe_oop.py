@@ -27,9 +27,7 @@ class Recipe(object):
         self.update_all_ingredients()
 
     def get_ingredients(self):
-        print('\nIngredients: ')
-        print('---------------------------')
-        print(self.ingredients)
+        return self.ingredients
 
     def get_difficulty(self):
         if self.difficulty == None:
@@ -39,16 +37,15 @@ class Recipe(object):
 
     def calc_difficulty(self, cooking_time, ingredients):
         if (cooking_time < 10) and (len(ingredients) < 4):
-            self.difficulty = 'Easy'
+            return 'Easy'
         elif (cooking_time < 10) and (len(ingredients) >= 4):
-            self.difficulty = 'Medium'
+            return 'Medium'
         elif (cooking_time >= 10) and (len(ingredients) < 4):
-            self.difficulty = 'Intermediate'
+            return 'Intermediate'
         elif (cooking_time >= 10) and (len(ingredients) >= 4):
-            self.difficulty = 'Hard'
+            return 'Hard'
         else:
             print('Something bad happened, please try again')
-        return self.difficulty
 
     def update_all_ingredients(self):
         for ingredient in self.ingredients:
@@ -82,6 +79,8 @@ class Recipe(object):
         print('\nName: ' + str(self.name))
         print('Cooking time: ' + str(self.cooking_time))
         print('\nDifficulty: ' + str(self.difficulty))
+        print('\nIngredients: ')
+        print('---------------------------')
         self.get_ingredients()
 
 
