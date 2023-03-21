@@ -7,9 +7,15 @@ from sqlalchemy import create_engine
 engine = create_engine("mysql://cf-python:password@localhost/my_database")
 
 Base = declarative_base()
+# Create tables of all models defined
+Base.metadata.create_all(engine)
 
+# Creates a session object that will be used to make changes to the database
+Session = sessionmaker(bind=engine)
+session = Session()
 
 # Declares Recipe Class that inherits from Base
+
 
 class Recipe(Base):
     __tablename__ = "final_recipes"
@@ -18,10 +24,10 @@ class Recipe(Base):
     name = Column(String(50))
     ingredients = Column(String(255))
     cooking_time = Column(Integer)
-    difficulty = Column(String(20))
+    difficulty = Column(ENUM('Easy', 'Medium', 'Intermediate', 'Hard'))
 
     def __repr__(self):
-        return "<Recipe ID: " + str(self.id) + "-" + self.name + ">"
+        return "<Recipe ID: " + str(self.id) + " - " + self.name + " - " + self.difficulty + ">"
 
     def __str__(self):
         output = "\nName: " + str(self.name) + \
@@ -30,13 +36,6 @@ class Recipe(Base):
             "\nIngredients: " + str(self.ingredients)
         return output
 
-
-# Create tables of all models defined
-Base.metadata.create_all(engine)
-
-# Creates a session object that will be used to make changes to the database
-Session = sessionmaker(bind=engine)
-session = Session()
 
 # calculate_difficulty() calculates the difficulty of the recipe by taking in cooking_time and ingredients as arguments, and assign the difficulty level as a strings: Easy, Medium, Intermediate, or Hard to the difficulty variable
 
@@ -57,18 +56,19 @@ def calc_difficulty(cooking_time, recipe_ingredients):
 
     return difficulty_level
 
-    # return_ingredients_as_list() function retrieves the ingredients string inside Recipe object as a list
+# return_ingredients_as_list() function retrieves the ingredients string inside Recipe object as a list
 
 
 def return_ingredients_as_list():
     # assign all recipes to recipes_list
     recipes_list = session.query(Recipe).all()
-    for recipe in recipes_list:
-        print("Recipe: ", recipe)
-        print("recipe.ingredients: ", recipe.ingredients)
-        # split the strings and create a list
-        recipe_ingredients_list = recipe.ingredients.split(", ")
-        print(recipe_ingredients_list)
+    if not recipes_list:
+        recipe_ingredients_list = []
+    else:
+        for recipe in recipes_list:
+            # split the strings and create a list
+            recipe_ingredients_list = recipe.ingredients.split(", ")
+    return recipe_ingredients_list
 
 
 # ====================================
@@ -196,7 +196,8 @@ def search_by_ingredients():
             for recipe_ingredients in recipe_ingredients_list:
                 # split each recipe ingredients tuple
                 recipe_ingredient_split = recipe_ingredients.split(", ")
-                all_ingredients.extend(recipe_ingredient_split)
+                if recipe_ingredient_split not in all_ingredients:
+                    all_ingredients.extend(recipe_ingredient_split)
 
         print("all_ingredients after the loop: ", all_ingredients)
 
@@ -288,22 +289,22 @@ def delete_recipe():
         # Look for the object associated with the ID and retrieve it
         recipe_to_be_deleted = session.query(Recipe).filter(
             Recipe.id == recipe_id_for_deletion).one()
+        if recipe_to_be_deleted is not None:
+            print("\nWARNING: You are about to delete the following recipe: ")
+            print(recipe_to_be_deleted)
 
-        print("\nWARNING: You are about to delete the following recipe: ")
-        print(recipe_to_be_deleted)
+            # Confirm with the user he wants to delete this entry
+            deletion_confirmed = input(
+                "\nPlease confirm you want to delete the entry above (y/n): ")
+            if deletion_confirmed == "y":
+                # Delete the corresponding recipe into result
+                session.delete(recipe_to_be_deleted)
 
-        # Confirm with the user he wants to delete this entry
-        deletion_confirmed = input(
-            "\nPlease confirm you want to delete the entry above (y/n): ")
-        if deletion_confirmed == "y":
-            # Delete the corresponding recipe into result
-            session.delete(recipe_to_be_deleted)
-
-            # Commits changes made to the final_recipes table
-            session.commit()
-            print("\nRecipe successfully deleted from the database.")
-        else:
-            return None
+                # Commits changes made to the final_recipes table
+                session.commit()
+                print("\nRecipe successfully deleted from the database.")
+            else:
+                return None
 
 
 # ====================================
@@ -329,10 +330,9 @@ def edit_recipe():
         recipe_id_for_edit = int(
             (input("\nEnter the ID of the recipe you want to edit: ")))
 
-        print(session.query(Recipe).with_entities(Recipe.id).all())
-
         recipes_id_tup_list = session.query(
             Recipe).with_entities(Recipe.id).all()
+        print(recipes_id_tup_list)
         recipes_id_list = []
 
         for recipe_tup in recipes_id_tup_list:
@@ -353,33 +353,38 @@ def edit_recipe():
             print(recipe_to_edit)
 
             # Asks the user to input which column he wants to update among name, cooking_time and ingredients
-            column_for_update = int(input(
-                "\nEnter the data you want to update among 1. name, 2. cooking time and 3. ingredients: (select '1' or '2' or '3'): "))
+            while True:
+                column_for_update = int(input(
+                    "\nEnter the data you want to update among 1. name, 2. cooking time and 3. ingredients: (select '1' or '2' or '3'): "))
 
-            # Asks the user to input the new value
-            updated_value = (input("\nEnter the new value for the recipe: "))
-            print("Choice: ", updated_value)
+                # Asks the user to input the new value
+                updated_value = (
+                    input("\nEnter the new value for the recipe: "))
+                print("Choice: ", updated_value)
 
-            if column_for_update == 1:
-                print("You want to update the name of the recipe")
-                session.query(Recipe).filter(Recipe.id == recipe_id_for_edit).update(
-                    {Recipe.name: updated_value})
-                session.commit()
+                if column_for_update == 1:
+                    print("You want to update the name of the recipe")
+                    session.query(Recipe).filter(Recipe.id == recipe_id_for_edit).update(
+                        {Recipe.name: updated_value})
+                    session.commit()
+                    break
 
-            elif column_for_update == 2:
-                print("You want to update the cooking time of the recipe")
-                session.query(Recipe).filter(Recipe.id == recipe_id_for_edit).update(
-                    {Recipe.cooking_time: updated_value})
-                session.commit()
+                elif column_for_update == 2:
+                    print("You want to update the cooking time of the recipe")
+                    session.query(Recipe).filter(Recipe.id == recipe_id_for_edit).update(
+                        {Recipe.cooking_time: updated_value})
+                    session.commit()
+                    break
 
-            elif column_for_update == 3:
-                print("You want to update the ingredients of the recipe")
-                session.query(Recipe).filter(Recipe.id == recipe_id_for_edit).update(
-                    {Recipe.ingredients: updated_value})
-                session.commit()
+                elif column_for_update == 3:
+                    print("You want to update the ingredients of the recipe")
+                    session.query(Recipe).filter(Recipe.id == recipe_id_for_edit).update(
+                        {Recipe.ingredients: updated_value})
+                    session.commit()
+                    break
 
-            else:
-                print("Wrong input, please try again.")
+                else:
+                    print("Wrong input, please try again.")
 
             # Recalculate the difficulty
             updated_difficulty = calc_difficulty(
