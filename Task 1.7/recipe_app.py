@@ -196,8 +196,9 @@ def search_by_ingredients():
             for recipe_ingredients in recipe_ingredients_list:
                 # split each recipe ingredients tuple
                 recipe_ingredient_split = recipe_ingredients.split(", ")
-                if recipe_ingredient_split not in all_ingredients:
-                    all_ingredients.extend(recipe_ingredient_split)
+                for recipe in recipe_ingredient_split:
+                    if recipe not in all_ingredients:
+                        all_ingredients.extend(recipe)
 
         print("all_ingredients after the loop: ", all_ingredients)
 
